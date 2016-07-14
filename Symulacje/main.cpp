@@ -18,11 +18,30 @@
 
 using namespace std;
 
+void preUpdate(int x, int y) {
+	float temp = cells[XY(x, y)].temperature / 100;
+	cells[XY(x, y)].temperature -= 20 * temp;
+
+	cells[XY(x, y - 1)].temperature += 5 * temp;
+	cells[XY(x - 1, y)].temperature += 5 * temp;
+	cells[XY(x + 1, y)].temperature += 5 * temp;
+	cells[XY(x, y + 1)].temperature += 5 * temp;
+
+	UNSET_UPDATED(x, y);
+
+}
+
 void updateCell(int pos) {
 	//if (cells[pos].flags & (1 << (1))) {  // don't update if sleeping
 	//	processed[pos] = true;
 	//	return;
 	//}
+
+	if ( (cells[pos].flags & (1 << (6))) )
+		return;
+
+	cells[pos].flags |= (1 << 6);
+
 	Property prop = properties[cells[pos].type];
 	int x = pos / mapSizeY;
 	int y = pos % mapSizeY;
@@ -60,9 +79,7 @@ void updateCell(int pos) {
 		prop.updateFunction(x, y);
 	}
 	else {
-		if (!updatePhysics(x, y)) {
-			activeCellsNextRound[activeCellNextRoundCount++] = pos; // arraydddd 
-		}
+		updatePhysics(x, y);
 	}
 }
 
@@ -72,45 +89,21 @@ void mainLoop() {
 
 	for (int i = 1; i < mapSizeX - 1; ++i)
 		for (int j = 1; j < mapSizeY - 1; ++j)
-			updateTemperatures(i, j);
+			preUpdate(i, j);
 
-	activeCellNextRoundCount = 0;
 	for (int i = 0; i < activeCellCount; i += 2)
 		updateCell(activeCells[i]);
 
 	for (int i = 1; i < activeCellCount; i += 2)
 		updateCell(activeCells[i]);
 
-	int ccc = 0;
-	while (activeCellNextRoundCount > 0 && ccc <= 15) {
-		ccc++;
-		if (ccc == 15)
-			cout << activeCellNextRoundCount << endl;
-		int count = activeCellNextRoundCount;
-		activeCellNextRoundCount = 0;
-		for (int i = 0; i < count; i += 1) {
-			int pos = activeCellsNextRound[i];
-			int x = pos / mapSizeY;
-			int y = pos % mapSizeY;
-			if (abs(cells[pos].velocityX) < 1 && abs(cells[pos].velocityY) < 1) {
-				properties[cells[pos].type].updateFunction(x, y);
-			}
-			else {
-				if (!updatePhysics(x, y)) {
-					activeCellsNextRound[activeCellNextRoundCount++] = pos; // arraydddd 
-				}
-			}
-			//updateCell(activeCellsNextRound[i], false);
-		}
-	}
-
+	
 	vel_step(u, v, u_prev, v_prev, 0.0f, 0.4f);
 	dens_step(dens, dens_prev, u, v, 0.0f, 0.4f);
 
 	memset(u_prev, 0, fluidBoxArraySize*sizeof(float));
 	memset(v_prev, 0, fluidBoxArraySize*sizeof(float));
 	memset(dens_prev, 0, fluidBoxArraySize*sizeof(float));
-	memset(processed, 0, mapSizeX * mapSizeY*sizeof(bool));
 
 	if (!showDensity)
 		updatePixelMap();
@@ -133,14 +126,12 @@ void initSimulation(char *path) {
 	mapSizeY = h;
 
 	pixels = new unsigned int[mapSizeY*mapSizeX]; // delete
-	processed = new bool[mapSizeY*mapSizeX]; //delete
 	activeCells = new int[mapSizeY*mapSizeX]; //delete
-	activeCellsNextRound = new int[mapSizeY*mapSizeX]; //delete
 	cells = new Cell[mapSizeY*mapSizeX]; //delete
 
 	// test
-	fluidX = new float[mapSizeY*mapSizeX];
-	fluidY = new float[mapSizeY*mapSizeX];
+	//fluidX = new float[mapSizeY*mapSizeX];
+	//fluidY = new float[mapSizeY*mapSizeX];
 
 	//fluids
 	fluidBoxX = mapSizeX / FLUID_BOX_SCALE;
@@ -158,8 +149,6 @@ void initSimulation(char *path) {
 
 	timer = clock();
 	fps = 0;
-
-	memset(processed, 0, mapSizeX * mapSizeY*sizeof(bool));
 
 	for (int i = 0; i < 256; ++i) {
 		randomBool[i] = (Random() < 0.5 ? true : false);
@@ -249,6 +238,7 @@ void keyboard(unsigned char key, int x, int y) {
 					if ((((j - y)*(j - y)) + ((i - x)*(i - x))) <= (spawnRadius*spawnRadius) && TYPE(i, j) != WALL) {
 						cells[XY(i, j)].velocityX = (float)((i - x) * 100);
 						cells[XY(i, j)].velocityY = (float)((j - y) * 100);
+						SET_MOVING(i, j);
 						wakeNearbyCells(i, j);
 					}
 				}
@@ -258,6 +248,21 @@ void keyboard(unsigned char key, int x, int y) {
 	case 99:     // c
 		printCell(x, y);
 		break;
+	case 101: //  e
+		for (int i = x - spawnRadius; i <= x + spawnRadius; ++i) {
+			for (int j = y - spawnRadius; j <= y + spawnRadius; ++j) {
+				if (i >= 0 && i < mapSizeX && j >= 0 && j < mapSizeY) {
+					if ((((j - y)*(j - y)) + ((i - x)*(i - x))) <= (spawnRadius*spawnRadius) && (TYPE(i, j) == EMPTY || hardSpawn)) {
+						if (Random() < 0.5) {
+							createCell(i, j, spawnType);
+							cells[XY(i, j)].velocityX = (Random() < 0.5 ? (Random() * 5.0f + 1.0f) : (-Random() * 5.0f - 1.0f));
+							cells[XY(i, j)].velocityY = (Random() < 0.5 ? (Random() * 5.0f + 1.0f) : (-Random() * 5.0f - 1.0f));
+						}
+					}
+				}
+			}
+		}
+	break;
 	case 102: //  f
 	{
 		float force = 3.0f;

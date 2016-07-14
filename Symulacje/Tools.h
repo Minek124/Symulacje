@@ -54,12 +54,13 @@ void printCell(int x, int y) {
 	std::string type = " type:" + std::to_string(((int)cells[XY(x, y)].type));
 	std::string sleep = (IS_SLEEPING2(x, y) ? (IS_SLEEPING1(x, y) ? ", SLEEPING+" : ", SLEEPING") : (IS_SLEEPING1(x, y) ? ", NOT_SLEEPING+" : ", NOT_SLEEPING"));
 	std::string liquid = (IS_LIQUID(x, y) ? (LIQUID_DIR(x, y) ? ", LIQUID_RIGHT" : ", LIQUID_LEFT") : ", NOT_LIQUID");
+	std::string solid = (IS_SOLID(x, y) ? ", SOLID" : ", NOT_SOLID");
 	std::string falling = (IS_MOVING(x, y) ? ", FALLING" : ", NOT_FALLING");
 	std::string speed = ", velocity: [" + std::to_string(cells[XY(x, y)].velocityX) + ", " + std::to_string(cells[XY(x, y)].velocityY) + "]" + ((abs(cells[XY(x, y)].velocityX) >= 1 || abs(cells[XY(x, y)].velocityY) >= 1) ? "PHYSIC" : "AUTO");
 	std::string active = (cells[XY(x, y)].activeCellIndex != -1 ? ", ACTIVE: " + std::to_string(activeCells[cells[XY(x, y)].activeCellIndex]) : ", NOT_ACTIVE");
 	std::string temperature = " temp:" + std::to_string(cells[XY(x, y)].temperature);
-	std::string proc = ( processed[XY(x, y)] ? " proc:" : " not_proc");
-	std::string s = cell + type + speed + sleep + liquid + falling + temperature + active + proc;
+	std::string proc = ( IS_UPDATED(x,y) ? " proc:" : " not_proc");
+	std::string s = cell + type + speed + sleep + liquid + solid + falling + temperature + active + proc;
 	std::cout << s << std::endl;
 }
 
@@ -95,8 +96,6 @@ void moveCell(int srcX, int srcY, int dstX, int dstY) {
 	if (cells[XY(dstX, dstY)].activeCellIndex != -1) {
 		activeCells[cells[XY(dstX, dstY)].activeCellIndex] = XY(dstX, dstY);
 	}
-	processed[XY(srcX, srcY)] = true;
-	processed[XY(dstX, dstY)] = true;
 
 	wakeNearbyCells(srcX, srcY);
 	wakeNearbyCells(dstX, dstY);
@@ -135,12 +134,15 @@ void createCell(int x, int y, unsigned int type) {
 		++activeCellCount;
 	}
 
+
 	if (properties[type].liquid) {
 		SET_LIQUID(x, y);
 		if (Random() < 0.5)
 			TOGGLE_DIR(x, y);
 	}
-
+	if (properties[type].solid) {
+		SET_SOLID(x, y);
+	}
 	
 }
 
@@ -158,17 +160,6 @@ void transformCell(int x, int y, unsigned char type) {
 
 inline void destroyCell(int x, int y) {
 	createCell(x, y, EMPTY);
-}
-
-void updateTemperatures(int x, int y) {
-	float temp = cells[XY(x, y)].temperature / 100;
-	cells[XY(x, y)].temperature -= 20 * temp;
-
-	cells[XY(x, y - 1)].temperature += 5 * temp;
-	cells[XY(x - 1, y)].temperature += 5 * temp;
-	cells[XY(x + 1, y)].temperature += 5 * temp;
-	cells[XY(x, y + 1)].temperature += 5 * temp;
-
 }
 
 // Bresenham's line algorithm for colision detection
@@ -230,7 +221,7 @@ bool checkWay(int& startX, int& startY, int& endX, int& endY) {
 	for (int curpixel = 1; curpixel <= numpixels; curpixel++) {
 
 
-		if (TYPE(x, y) != EMPTY) {
+		if (IS_SOLID(x, y)) {
 			endX = prevX;
 			endY = prevY;
 			startX = x;

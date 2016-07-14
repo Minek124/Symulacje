@@ -35,7 +35,7 @@ void burn(int x, int y) {
 
 void updateSand(int x, int y) {
 	int targetY = y + 1;
-	SET_MOVING(x, y);
+	//SET_MOVING(x, y);
 	if (IS_LIQUID(x, targetY)) {
 		moveCell(x, y, x, targetY);
 		return;
@@ -68,7 +68,6 @@ void updateSand(int x, int y) {
 	UNSET_MOVING(x, y);
 	cells[XY(x, y)].velocityY = 0;
 	cells[XY(x, y)].velocityX = 0;
-	processed[XY(x, y)] = true;
 }
 
 void updateFluid(int x, int y) {
@@ -136,9 +135,8 @@ void updateFluid(int x, int y) {
 	}
 	SET_SLEEPING1(x, y);
 	UNSET_MOVING(x, y);
-	cells[XY(x, y)].velocityY = 0;
-	cells[XY(x, y)].velocityX = 0;
-	processed[XY(x, y)] = true;
+	//cells[XY(x, y)].velocityY = 0;
+	//cells[XY(x, y)].velocityX = 0;
 }
 
 void updateAir(int x, int y) {
@@ -172,5 +170,4 @@ void updateAir(int x, int y) {
 
 	}
 	UNSET_MOVING(x, y);
-	processed[XY(x, y)] = true;
 }

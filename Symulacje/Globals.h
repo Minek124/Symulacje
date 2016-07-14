@@ -6,9 +6,6 @@ unsigned char randomBoolCount = 0;
 // active cell array size
 int activeCellCount;
 
-// active cell array size to process in next round
-int activeCellNextRoundCount;
-
 // cell array size X
 int mapSizeX;
 
@@ -24,13 +21,8 @@ unsigned int *pixels;
 // array of active cells, almost all cells without EMPTY and WALL
 int *activeCells;
 
-// array of active cells to process in next round
-int *activeCellsNextRound;
-
 // cell array
 Cell *cells;
-
-bool *processed;
 
 //fluids
 int ox;
@@ -45,12 +37,12 @@ float *v_prev;
 float *dens;
 float *dens_prev;
 
-float *fluidX;
-float *fluidY;
+//float *fluidX;
+//float *fluidY;
 
 // helper variables, not used in simulation
 unsigned int spawnType = 2;
-int spawnRadius = 0;
+int spawnRadius = 15;
 bool hardSpawn = false;
 bool paused = false;
 bool logging = false;

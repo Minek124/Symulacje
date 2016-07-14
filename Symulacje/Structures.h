@@ -25,6 +25,7 @@ struct Property {
 	unsigned char springiness;
 	bool active;
 	bool liquid;
+	bool solid;
 	int RGB;
 };
 
@@ -34,6 +35,7 @@ void updateSand(int x, int y);
 void updateFlame(int x, int y);
 void updateAir(int x, int y);
 void burn(int x, int y);
+void updateCell(int pos);
 
 inline float Random() {
 	return ((float)rand() / (RAND_MAX));

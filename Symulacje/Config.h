@@ -13,17 +13,23 @@
 #define IS_SLEEPING2(x,y) (cells[XY(x,y)].flags & (1<<(1)))
 #define IS_LIQUID(x,y) (cells[XY(x,y)].flags & (1<<(2)))
 #define IS_MOVING(x,y) (cells[XY(x,y)].flags & (1<<(3)))
+#define IS_SOLID(x,y) (cells[XY(x,y)].flags & (1<<(4)))
+#define IS_UPDATED(x,y) (cells[XY(x,y)].flags & (1<<(6)))
 #define IS_EMPTY(x,y) (cells[XY(x,y)].type == EMPTY)
+#define IS_ACTIVE(x,y) (cells[XY(obstacleX, obstacleY)].activeCellIndex != -1)
 #define TYPE(x,y) cells[XY(x,y)].type
 
 #define SET_SLEEPING1(x,y) (cells[XY(x,y)].flags |= 1)
 #define SET_SLEEPING2(x,y) (cells[XY(x,y)].flags |= (1 << 1))
 #define SET_LIQUID(x,y) (cells[XY(x,y)].flags |= (1 << 2))
 #define SET_MOVING(x,y) (cells[XY(x,y)].flags |= (1 << 3))
+#define SET_SOLID(x,y) (cells[XY(x,y)].flags |= (1 << 4))
+#define SET_UPDATED(x,y) (cells[XY(x,y)].flags |= (1 << 6))
 
 #define WAKE(x,y) (cells[XY(x,y)].flags &= ~3)
 #define UNSET_LIQUID(x,y) (cells[XY(x,y)].flags &= ~(1 << 2))
 #define UNSET_MOVING(x,y) (cells[XY(x,y)].flags &= ~(1 << 3))
+#define UNSET_UPDATED(x,y) (cells[XY(x,y)].flags &= ~(1 << 6))
 
 #define LIQUID_DIR(x,y) (cells[XY(x,y)].flags & (1<<(5)))
 #define LEFT_DIR(x,y) (cells[XY(x,y)].flags &= ~(1 << 5))
@@ -70,7 +76,7 @@
 
 
 //CONSTANTS
-#define G 0.04f
+#define G 0.03f
 #define SA 0.1f // 0.5 G
 #define WA 0.2f
 #define WR 10
@@ -108,6 +114,8 @@ const Property properties[] = {
 	false,
 	// liquid
 	true,
+	// solid
+	false,
 	// RGB 
 	EMPTY_RGB
 	},
@@ -136,6 +144,8 @@ const Property properties[] = {
 	false,
 	// liquid
 	false,
+	// solid
+	true,
 	// RGB 
 	WALL_RGB
 	},
@@ -164,6 +174,8 @@ const Property properties[] = {
 	true,
 	// liquid
 	false,
+	// solid
+	true,
 	// RGB 
 	SAND_RGB
 	},
@@ -187,10 +199,12 @@ const Property properties[] = {
 	// weight
 	10,
 	// springiness
-	20,
+	1,
 	// active
 	true,
 	// liquid
+	true,
+	// solid
 	true,
 	// RGB 
 	WATER_RGB
@@ -220,6 +234,8 @@ const Property properties[] = {
 	true,
 	// liquid
 	true,
+		// solid
+		true,
 	// RGB 
 	OLIVE_RGB
 	},
@@ -248,6 +264,8 @@ const Property properties[] = {
 	true,
 	// liquid
 	false,
+		// solid
+		true,
 	// RGB 
 	FIREWORK_RGB
 	},
@@ -276,6 +294,8 @@ const Property properties[] = {
 	true,
 	// liquid
 	false,
+		// solid
+		true,
 	// RGB 
 	DIRT_RGB
 	},
@@ -304,6 +324,8 @@ const Property properties[] = {
 	true,
 	// liquid
 	true,
+		// solid
+		false,
 	// RGB 
 	FLAME_RGB(0)
 	},
@@ -332,6 +354,8 @@ const Property properties[] = {
 	true,
 	// liquid
 	false,
+		// solid
+		true,
 	// RGB 
 	RUBBER_RGB
 	},
@@ -360,6 +384,8 @@ const Property properties[] = {
 	true,
 	// liquid
 	false,
+		// solid
+		true,
 	// RGB 
 	ICE_RGB
 	},
@@ -383,11 +409,13 @@ const Property properties[] = {
 	// weight
 	0,
 	// springiness
-	10,
+	50,
 	// active
 	true,
 	// liquid
 	true,
+		// solid
+		false,
 	// RGB 
 	STEAM_RGB
 	},
@@ -416,6 +444,8 @@ const Property properties[] = {
 	true,
 	// liquid
 	false,
+		// solid
+		true,
 	// RGB 
 	GLASS_RGB
 	},
@@ -444,6 +474,8 @@ const Property properties[] = {
 	true,
 	// liquid
 	false,
+		// solid
+		true,
 	// RGB 
 	UNKNOWN_RGB
 	},
@@ -472,6 +504,8 @@ const Property properties[] = {
 	true,
 	// liquid
 	true,
+		// solid
+		true,
 	// RGB 
 	OLIVE_RGB
 	},
