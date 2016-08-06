@@ -226,7 +226,7 @@ void keyboard(unsigned char key, int x, int y) {
 		spawnType = STEAM;
 		break;
 	case 56:     // 8
-		spawnType = WALL;
+		spawnType = ICE;
 		break;
 	case 57:     // 9
 		spawnType = WALL;

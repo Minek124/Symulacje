@@ -135,8 +135,8 @@ void updateFluid(int x, int y) {
 	}
 	SET_SLEEPING1(x, y);
 	UNSET_MOVING(x, y);
-	//cells[XY(x, y)].velocityY = 0;
-	//cells[XY(x, y)].velocityX = 0;
+	cells[XY(x, y)].velocityY = 0;
+	cells[XY(x, y)].velocityX = 0;
 }
 
 void updateAir(int x, int y) {
