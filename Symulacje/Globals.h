@@ -37,9 +37,6 @@ float *v_prev;
 float *dens;
 float *dens_prev;
 
-//float *fluidX;
-//float *fluidY;
-
 // helper variables, not used in simulation
 unsigned int spawnType = 2;
 int spawnRadius = 15;

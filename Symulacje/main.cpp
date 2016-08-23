@@ -1,9 +1,8 @@
 #include <iostream>
-#include <windows.h>
 #include <GL/glut.h>
-#include <Math.h>
-#include <random>
 #include <string>
+#include <time.h>
+
 #include "picopng.h"
 
 #include "Config.h"
@@ -13,39 +12,29 @@
 #include "Fluids.h"
 #include "Physics.h"
 
-#include <time.h>
-
-
 using namespace std;
 
-void preUpdate(int x, int y) {
-	float temp = cells[XY(x, y)].temperature / 100;
+inline void preUpdate(int x, int y) {
+	/*float temp = cells[XY(x, y)].temperature / 100;
 	cells[XY(x, y)].temperature -= 20 * temp;
 
 	cells[XY(x, y - 1)].temperature += 5 * temp;
 	cells[XY(x - 1, y)].temperature += 5 * temp;
 	cells[XY(x + 1, y)].temperature += 5 * temp;
-	cells[XY(x, y + 1)].temperature += 5 * temp;
+	cells[XY(x, y + 1)].temperature += 5 * temp;*/
 
 	UNSET_UPDATED(x, y);
 
 }
 
 void updateCell(int pos) {
-	//if (cells[pos].flags & (1 << (1))) {  // don't update if sleeping
-	//	processed[pos] = true;
-	//	return;
-	//}
-
-	if ( (cells[pos].flags & (1 << (6))) )
+	if ( (cells[pos].flags & (1 << (6))) ) // already updated
 		return;
-
-	cells[pos].flags |= (1 << 6);
+	cells[pos].flags |= (1 << 6); // set cell updated
 
 	Property prop = properties[cells[pos].type];
 	int x = pos / mapSizeY;
 	int y = pos % mapSizeY;
-
 	
 	// air movements
 	int i = x / 10 + 1;
@@ -97,9 +86,10 @@ void mainLoop() {
 	for (int i = 1; i < activeCellCount; i += 2)
 		updateCell(activeCells[i]);
 
-	
+	// fluids
 	vel_step(u, v, u_prev, v_prev, 0.0f, 0.4f);
 	dens_step(dens, dens_prev, u, v, 0.0f, 0.4f);
+
 
 	memset(u_prev, 0, fluidBoxArraySize*sizeof(float));
 	memset(v_prev, 0, fluidBoxArraySize*sizeof(float));
@@ -128,10 +118,6 @@ void initSimulation(char *path) {
 	pixels = new unsigned int[mapSizeY*mapSizeX]; // delete
 	activeCells = new int[mapSizeY*mapSizeX]; //delete
 	cells = new Cell[mapSizeY*mapSizeX]; //delete
-
-	// test
-	//fluidX = new float[mapSizeY*mapSizeX];
-	//fluidY = new float[mapSizeY*mapSizeX];
 
 	//fluids
 	fluidBoxX = mapSizeX / FLUID_BOX_SCALE;
@@ -172,6 +158,7 @@ void display() {
 	glDrawPixels(mapSizeX, mapSizeY, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
 	++fps;
 	double stop = (clock() - timer)*1.0 / CLOCKS_PER_SEC;
+
 	if (stop > 1.0) {
 		if (logging)
 			cout << "fps:" << fps << endl;
@@ -236,10 +223,9 @@ void keyboard(unsigned char key, int x, int y) {
 			for (int j = y - spawnRadius; j <= y + spawnRadius; ++j) {
 				if (i >= 0 && i < mapSizeX && j >= 0 && j < mapSizeY) {
 					if ((((j - y)*(j - y)) + ((i - x)*(i - x))) <= (spawnRadius*spawnRadius) && TYPE(i, j) != WALL) {
-						cells[XY(i, j)].velocityX = (float)((i - x) * 100);
-						cells[XY(i, j)].velocityY = (float)((j - y) * 100);
+						cells[XY(i, j)].velocityX = (float)((i - x) * 1);
+						cells[XY(i, j)].velocityY = (float)((j - y) * 1);
 						SET_MOVING(i, j);
-						wakeNearbyCells(i, j);
 					}
 				}
 			}

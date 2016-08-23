@@ -127,7 +127,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Automation.h" />
-    <ClInclude Include="CImg.h" />
     <ClInclude Include="Config.h" />
     <ClInclude Include="Fluids.h" />
     <ClInclude Include="Globals.h" />

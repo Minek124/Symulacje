@@ -1,35 +1,18 @@
 #pragma once
 
-// wake 3x3 area of cells
-void wakeNearbyCells(int x, int y) {
-	if (x == 0 || x == mapSizeX - 1 || y == 0 || y == mapSizeY - 1)
-		return;
-	WAKE(x - 1, y - 1);
-	WAKE(x, y - 1);
-	WAKE(x + 1, y - 1);
-
-	WAKE(x - 1, y);
-	WAKE(x, y);
-	WAKE(x + 1, y);
-
-	WAKE(x - 1, y + 1);
-	WAKE(x, y + 1);
-	WAKE(x + 1, y + 1);
-
-}
-
 void updatePixelMap() {
 	for (int i = 0; i < mapSizeY; i++) {
 		for (int j = 0; j < mapSizeX; j++) {
 			//if (cells[XY(j, i)].type != FLAME)
 				pixels[TEX_XY(j, i)] = properties[cells[XY(j, i)].type].RGB | ALPHA;
-			//else {
-			//	pixels[TEX_XY(j, i)] = FLAME_RGB(2 * (5 - ((int)((cells[XY(j, i)].temperature - FLAME_LOW_TEMP)) / 100))) | ALPHA;
-			//}
+			/*else {
+				pixels[TEX_XY(j, i)] = FLAME_RGB(2 * (5 - ((int)((cells[XY(j, i)].temperature - FLAME_LOW_TEMP)) / 100))) | ALPHA;
+			}*/
 		}
 	}
 }
 
+// update air flow on pixelmap
 void updatePixelMap2() {
 	for (int i = 0; i < mapSizeX; i++) {
 		for (int j = 0; j < mapSizeY; j++) {
@@ -49,6 +32,7 @@ void updatePixelMap2() {
 	}
 }
 
+// debug cell
 void printCell(int x, int y) {
 	std::string cell = "cell[" + std::to_string(x) + "][" + std::to_string(y) + "]";
 	std::string type = " type:" + std::to_string(((int)cells[XY(x, y)].type));
@@ -96,9 +80,6 @@ void moveCell(int srcX, int srcY, int dstX, int dstY) {
 	if (cells[XY(dstX, dstY)].activeCellIndex != -1) {
 		activeCells[cells[XY(dstX, dstY)].activeCellIndex] = XY(dstX, dstY);
 	}
-
-	wakeNearbyCells(srcX, srcY);
-	wakeNearbyCells(dstX, dstY);
 }
 
 void cloneCell(int srcX, int srcY, int dstX, int dstY) {
@@ -120,13 +101,15 @@ void createCell(int x, int y, unsigned int type) {
 	}
 
 	// cell properties
+	Property prop = properties[type];
+
 	cells[XY(x, y)].velocityY = 0;
 	cells[XY(x, y)].velocityX = 0;
-	cells[XY(x, y)].temperature = properties[type].initTemperature;
+	cells[XY(x, y)].temperature = prop.initTemperature;
 	cells[XY(x, y)].type = type;
+	cells[XY(x, y)].weight = prop.weight;
+	cells[XY(x, y)].springiness = prop.springiness;
 	cells[XY(x, y)].flags = 0;
-
-	wakeNearbyCells(x, y);
 
 	if (properties[type].active) {
 		activeCells[activeCellCount] = XY(x, y);
@@ -134,12 +117,12 @@ void createCell(int x, int y, unsigned int type) {
 		++activeCellCount;
 	}
 
-
 	if (properties[type].liquid) {
 		SET_LIQUID(x, y);
 		if (Random() < 0.5)
 			TOGGLE_DIR(x, y);
 	}
+
 	if (properties[type].solid) {
 		SET_SOLID(x, y);
 	}
@@ -215,12 +198,8 @@ bool checkWay(int& startX, int& startY, int& endX, int& endY) {
 	}
 	x += xinc2;
 	y += yinc2;
-	//zero iteration
-
 
 	for (int curpixel = 1; curpixel <= numpixels; curpixel++) {
-
-
 		if (IS_SOLID(x, y)) {
 			endX = prevX;
 			endY = prevY;
@@ -228,7 +207,6 @@ bool checkWay(int& startX, int& startY, int& endX, int& endY) {
 			startY = y;
 			return false;
 		}
-		//createCell(prevX, prevY, 11);
 
 		prevX = x;
 		prevY = y;

@@ -41,9 +41,6 @@
     <ClInclude Include="Fluids.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="CImg.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="picopng.h">
       <Filter>Header Files</Filter>
     </ClInclude>

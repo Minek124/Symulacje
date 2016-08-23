@@ -1,6 +1,5 @@
 #pragma once
 
-// max 16 bytes
 struct Cell {
 	Cell() : activeCellIndex(-1) {};
 	int activeCellIndex;
@@ -8,8 +7,8 @@ struct Cell {
 	float velocityY;
 	float temperature;
 	unsigned char type;
-	//unsigned char weight;
-	//unsigned char springiness;
+	unsigned char weight;
+	unsigned char springiness;
 	unsigned char flags;
 };
 

@@ -16,7 +16,7 @@
 #define IS_SOLID(x,y) (cells[XY(x,y)].flags & (1<<(4)))
 #define IS_UPDATED(x,y) (cells[XY(x,y)].flags & (1<<(6)))
 #define IS_EMPTY(x,y) (cells[XY(x,y)].type == EMPTY)
-#define IS_ACTIVE(x,y) (cells[XY(obstacleX, obstacleY)].activeCellIndex != -1)
+#define IS_ACTIVE(x,y) (cells[XY(x, y)].activeCellIndex != -1)
 #define TYPE(x,y) cells[XY(x,y)].type
 
 #define SET_SLEEPING1(x,y) (cells[XY(x,y)].flags |= 1)
@@ -73,13 +73,10 @@
 #define UNKNOWN_RGB 0x660066
 #define ALPHA 4278190080
 
-
-
 //CONSTANTS
 #define G 0.03f
 #define SA 0.1f // 0.5 G
-#define WA 0.2f
-#define WR 10
+#define WA 0.4f
 
 #define FLUID_BOX_SCALE 10
 
@@ -197,7 +194,7 @@ const Property properties[] = {
 	// low temeprature transform
 	ICE,
 	// weight
-	10,
+	15,
 	// springiness
 	1,
 	// active
@@ -227,7 +224,7 @@ const Property properties[] = {
 	// low temeprature transform
 	255,
 	// weight
-	8,
+	13,
 	// springiness
 	3,
 	// active
@@ -347,9 +344,9 @@ const Property properties[] = {
 	// low temeprature transform
 	255,
 	// weight
-	10,
+	15,
 	// springiness
-	80,
+	90,
 	// active
 	true,
 	// liquid
@@ -508,6 +505,6 @@ const Property properties[] = {
 		true,
 	// RGB 
 	OLIVE_RGB
-	},
+	}
 
 };
