@@ -1,0 +1,22 @@
+cmake_minimum_required(VERSION 2.8)
+PROJECT(symulacje)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+find_package(GLUT REQUIRED)
+if(NOT GLUT_FOUND)
+    message(ERROR " GLUT not found!")
+endif(NOT GLUT_FOUND)
+include_directories(${GLUT_INCLUDE_DIRS})
+link_directories(${GLUT_LIBRARY_DIRS})
+add_definitions(${GLUT_DEFINITIONS})
+
+find_package(OpenGL REQUIRED)
+include_directories(${OpenGL_INCLUDE_DIRS})
+link_directories(${OpenGL_LIBRARY_DIRS})
+add_definitions(${OpenGL_DEFINITIONS})
+if(NOT OPENGL_FOUND)
+    message(ERROR " OPENGL not found!")
+endif(NOT OPENGL_FOUND)
+
+add_executable(symulacje main.cpp picopng.h Config.h Globals.h Tools.h Automation.h Fluids.h Physics.h)
+
+target_link_libraries(symulacje ${OPENGL_LIBRARIES} ${GLUT_LIBRARY})
