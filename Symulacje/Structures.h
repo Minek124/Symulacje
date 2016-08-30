@@ -25,7 +25,7 @@ struct Property {
 	bool active;
 	bool liquid;
 	bool solid;
-	int RGB;
+	unsigned int RGB;
 };
 
 

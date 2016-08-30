@@ -98,7 +98,7 @@ void updateFluid(int x, int y) {
 			return;
 		}
 		else {
-			if (!IS_UPDATED(x + 1, y)) {
+			if (!IS_UPDATED(x + 1, y) && IS_ACTIVE(x + 1, y)) {
 				RIGHT_DIR(x + 1, y);
 				updateCell(XY(x + 1, y));
 				updateFluid(x, y);
@@ -114,7 +114,7 @@ void updateFluid(int x, int y) {
 			return;
 		}
 		else {
-			if (!IS_UPDATED(x - 1, y)) {
+			if (!IS_UPDATED(x - 1, y) && IS_ACTIVE(x - 1, y)) {
 				LEFT_DIR(x - 1, y);
 				updateCell(XY(x - 1, y));
 				updateFluid(x, y);

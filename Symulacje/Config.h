@@ -1,7 +1,5 @@
 #pragma once
 
-#pragma once
-
 #include "Structures.h"
 
 #define XY(a,b) ((a)*mapSizeY+(b))

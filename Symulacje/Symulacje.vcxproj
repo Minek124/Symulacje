@@ -132,8 +132,15 @@
     <ClInclude Include="Globals.h" />
     <ClInclude Include="Physics.h" />
     <ClInclude Include="picopng.h" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="Structures.h" />
     <ClInclude Include="Tools.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Symulacje.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="CMakeLists.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

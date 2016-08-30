@@ -1,7 +1,10 @@
 #include <iostream>
 #include <GL/glut.h>
 #include <string>
+#include <string.h>
 #include <time.h>
+#include <cmath>
+#include <climits>
 
 #include "picopng.h"
 
