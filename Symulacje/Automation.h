@@ -13,24 +13,24 @@ void updateSand(int x, int y) {
 		return;
 	}
 	if (randomBool[randomBoolCount++] && IS_LIQUID(x + 1, targetY)) {
-		cells[XY(x, y)].velocityX += SA;
+		cells[XY(x, y)].velX += SA;
 		moveCell(x, y, x + 1, targetY);
 		return;
 	}
 	if (IS_LIQUID(x - 1, targetY)) {
-		cells[XY(x, y)].velocityX -= SA;
+		cells[XY(x, y)].velX -= SA;
 		moveCell(x, y, x - 1, targetY);
 		return;
 	}
 	if (IS_LIQUID(x + 1, targetY)) {
-		cells[XY(x, y)].velocityX += SA;
+		cells[XY(x, y)].velX += SA;
 		moveCell(x, y, x + 1, targetY);
 		return;
 
 	}
 	UNSET_MOVING(x, y);
-	cells[XY(x, y)].velocityY = 0;
-	cells[XY(x, y)].velocityX = 0;
+	cells[XY(x, y)].velY = 0;
+	cells[XY(x, y)].velX = 0;
 }
 
 void updateFluid(int x, int y) {
@@ -42,19 +42,19 @@ void updateFluid(int x, int y) {
 	}
 	if (IS_LIQUID(x + 1, dstY) && randomBool[randomBoolCount++] && weight > cells[XY(x + 1, dstY)].weight) {
 		RIGHT_DIR(x, y);
-		cells[XY(x, y)].velocityX += WA;
+		cells[XY(x, y)].velX += WA;
 		moveCell(x, y, x + 1, dstY);
 		return;
 	}
 	if (IS_LIQUID(x - 1, dstY) && weight > cells[XY(x - 1, dstY)].weight) {
 		LEFT_DIR(x, y);
-		cells[XY(x, y)].velocityX -= WA;
+		cells[XY(x, y)].velX -= WA;
 		moveCell(x, y, x - 1, dstY);
 		return;
 	}
 	if (IS_LIQUID(x + 1, dstY) && weight > cells[XY(x + 1, dstY)].weight) {
 		RIGHT_DIR(x, y);
-		cells[XY(x, y)].velocityX += WA;
+		cells[XY(x, y)].velX += WA;
 		moveCell(x, y, x + 1, dstY);
 		return;
 	}
@@ -93,7 +93,7 @@ void updateFluid(int x, int y) {
 	
 	if (LIQUID_DIR(x, y)) {
 		if (IS_LIQUID(x + 1, y) && weight > cells[XY(x + 1, y)].weight) {
-			cells[XY(x, y)].velocityX += WA;
+			cells[XY(x, y)].velX += WA;
 			moveCell(x, y, x + 1, y);
 			return;
 		}
@@ -109,7 +109,7 @@ void updateFluid(int x, int y) {
 	}
 	else {
 		if (IS_LIQUID(x - 1, y) && weight > cells[XY(x - 1, y)].weight) {
-			cells[XY(x, y)].velocityX -= WA;
+			cells[XY(x, y)].velX -= WA;
 			moveCell(x, y, x - 1, y);
 			return;
 		}
@@ -125,8 +125,8 @@ void updateFluid(int x, int y) {
 	}
 
 	UNSET_MOVING(x, y);
-	cells[XY(x, y)].velocityY = 0;
-	cells[XY(x, y)].velocityX = 0;
+	cells[XY(x, y)].velY = 0;
+	cells[XY(x, y)].velX = 0;
 }
 
 #define FFF 50

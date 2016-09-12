@@ -36,6 +36,7 @@ float *u_prev;
 float *v_prev;
 float *dens;
 float *dens_prev;
+bool *fluidObstacles;
 
 // helper variables, not used in simulation
 unsigned int spawnType = 2;

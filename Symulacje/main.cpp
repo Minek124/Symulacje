@@ -38,36 +38,30 @@ void updateCell(int pos) {
 	Property prop = properties[cells[pos].type];
 	int x = pos / mapSizeY;
 	int y = pos % mapSizeY;
+
+	// high temperature transform
+	if (cells[pos].temperature > prop.highTemeperature) {
+		transformCell(x, y, prop.highTemperatureTransform);
+		prop = properties[cells[pos].type];
+	}
+	// low temperature transform
+	if (cells[pos].temperature < prop.lowTemeperature) {
+		transformCell(x, y, prop.lowTemperatureTransform);
+		prop = properties[cells[pos].type];
+	}
 	
 	// air movements
 	int i = x / 10 + 1;
 	int j = y / 10 + 1;
-	if (prop.weight != 0) {
-		cells[pos].velocityX += (u[IX(i, j)]) * 100 / prop.weight;
-		cells[pos].velocityY += (v[IX(i, j)]) * 100 / prop.weight;
-	}
-	else {
-		cells[pos].velocityX += (u[IX(i, j)]) * 100;
-		cells[pos].velocityY += (v[IX(i, j)]) * 100;
-	}
+	cells[pos].velX += (u[IX(i, j)]) * 100 / (prop.weight + 1);
+	cells[pos].velY += (v[IX(i, j)]) * 100 / (prop.weight + 1);
+
 	//gravity
-	cells[pos].velocityY += G * prop.weight;
-
-
-	// high temperature transform
-	if (cells[pos].temperature >= prop.highTemeperature) {
-		transformCell(x, y, prop.highTemperatureTransform);
-		return;
-	}
-	// low temperature transform
-	if (cells[pos].temperature <= prop.lowTemeperature) {
-		transformCell(x, y, prop.lowTemperatureTransform);
-		return;
-	}
+	cells[pos].velY += G * prop.weight;
 
 	prop.specialBehaviorFunction(x, y);
 
-	if (abs(cells[pos].velocityX) < 1 && abs(cells[pos].velocityY) < 1) {
+	if (abs(cells[pos].velX) < 1 && abs(cells[pos].velY) < 1) {
 		prop.updateFunction(x, y);
 	}
 	else {
@@ -132,6 +126,7 @@ void initSimulation(char *path) {
 	v_prev = new float[fluidBoxArraySize];
 	dens = new float[fluidBoxArraySize];
 	dens_prev = new float[fluidBoxArraySize];
+	fluidObstacles = new bool[fluidBoxArraySize];
 	clearFluidBox();
 
 	activeCellCount = 0;
@@ -149,7 +144,14 @@ void initSimulation(char *path) {
 			unsigned char r = image[xy];
 			unsigned char g = image[xy + 1];
 			unsigned char b = image[xy + 2];
-			createCell(x, y, colorToType(r, g, b));
+			unsigned int type = colorToType(r, g, b);
+			createCell(x, y, type);
+			if (type == WALL) {
+				int i = x / 10 + 1;
+				int j = y / 10 + 1;
+				if(i > 1 && j > 1 && i < fluidBoxX && j < fluidBoxY)
+				fluidObstacles[IX(i, j)] = true;
+			}
 		}
 	}
 
@@ -226,8 +228,8 @@ void keyboard(unsigned char key, int x, int y) {
 			for (int j = y - spawnRadius; j <= y + spawnRadius; ++j) {
 				if (i >= 0 && i < mapSizeX && j >= 0 && j < mapSizeY) {
 					if ((((j - y)*(j - y)) + ((i - x)*(i - x))) <= (spawnRadius*spawnRadius) && TYPE(i, j) != WALL) {
-						cells[XY(i, j)].velocityX = (float)((i - x) * 1);
-						cells[XY(i, j)].velocityY = (float)((j - y) * 1);
+						cells[XY(i, j)].velX = (float)((i - x) * 1);
+						cells[XY(i, j)].velY = (float)((j - y) * 1);
 						SET_MOVING(i, j);
 					}
 				}
@@ -244,8 +246,8 @@ void keyboard(unsigned char key, int x, int y) {
 					if ((((j - y)*(j - y)) + ((i - x)*(i - x))) <= (spawnRadius*spawnRadius) && (TYPE(i, j) == EMPTY || hardSpawn)) {
 						if (Random() < 0.5) {
 							createCell(i, j, spawnType);
-							cells[XY(i, j)].velocityX = (Random() < 0.5 ? (Random() * 5.0f + 1.0f) : (-Random() * 5.0f - 1.0f));
-							cells[XY(i, j)].velocityY = (Random() < 0.5 ? (Random() * 5.0f + 1.0f) : (-Random() * 5.0f - 1.0f));
+							cells[XY(i, j)].velX = (Random() < 0.5 ? (Random() * 5.0f + 1.0f) : (-Random() * 5.0f - 1.0f));
+							cells[XY(i, j)].velY = (Random() < 0.5 ? (Random() * 5.0f + 1.0f) : (-Random() * 5.0f - 1.0f));
 						}
 					}
 				}
@@ -327,8 +329,8 @@ void mouse(int button, int state, int x, int y) {
 					if ((((j - y)*(j - y)) + ((i - x)*(i - x))) <= (spawnRadius*spawnRadius) && (TYPE(i, j) == EMPTY || hardSpawn)) {
 						if (Random() < 0.5) {
 							createCell(i, j, spawnType);
-							cells[XY(i, j)].velocityX = (Random() < 0.5 ? (Random() * 5.0f + 1.0f) : (-Random() * 5.0f - 1.0f));
-							cells[XY(i, j)].velocityY = (Random() < 0.5 ? (Random() * 5.0f + 1.0f) : (-Random() * 5.0f - 1.0f));
+							cells[XY(i, j)].velX = (Random() < 0.5 ? (Random() * 5.0f + 1.0f) : (-Random() * 5.0f - 1.0f));
+							cells[XY(i, j)].velY = (Random() < 0.5 ? (Random() * 5.0f + 1.0f) : (-Random() * 5.0f - 1.0f));
 						}
 					}
 				}
@@ -337,21 +339,6 @@ void mouse(int button, int state, int x, int y) {
 	}
 
 	if (button == GLUT_MIDDLE_BUTTON && state == GLUT_DOWN) {
-		int r = 40;
-		for (int i = x - r; i < x + r; ++i) {
-			for (int j = y - r; j < y + r; ++j) {
-				if (j >= 0 && j < mapSizeY && i >= 0 && i < mapSizeX) {
-					if (TYPE(i, j) == EMPTY || hardSpawn) {
-						if (Random() < 0.5) {
-							createCell(i, j, spawnType);
-						}
-					}
-				}
-			}
-		}
-	}
-
-	if (button == GLUT_RIGHT_BUTTON && state == GLUT_DOWN) {
 		int r = 40;
 		for (int i = y + r; i > y - r; --i) {
 			for (int j = x - r; j < x + r; ++j) {
@@ -364,7 +351,21 @@ void mouse(int button, int state, int x, int y) {
 				}
 			}
 		}
+	}
 
+	if (button == GLUT_RIGHT_BUTTON && state == GLUT_DOWN) {
+		int r = 40;
+		for (int i = x - r; i < x + r; ++i) {
+			for (int j = y - r; j < y + r; ++j) {
+				if (j >= 0 && j < mapSizeY && i >= 0 && i < mapSizeX) {
+					if (TYPE(i, j) == EMPTY || hardSpawn) {
+						if (Random() < 0.5) {
+							createCell(i, j, spawnType);
+						}
+					}
+				}
+			}
+		}
 	}
 }
 

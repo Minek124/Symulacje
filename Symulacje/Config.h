@@ -38,6 +38,7 @@
 //#define MAP "maps/piasek.png"
 //#define MAP "maps/woda.png"
 //#define MAP "maps/pusta.png"
+//#define MAP "maps/fluids.png"
 //#define MAP "maps/small.png"
 //#define MAP "maps/test.png"
 

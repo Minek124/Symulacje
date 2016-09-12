@@ -3,8 +3,8 @@
 struct Cell {
 	Cell() : activeCellIndex(-1) {};
 	int activeCellIndex;
-	float velocityX;
-	float velocityY;
+	float velX;
+	float velY;
 	float temperature;
 	unsigned char type;
 	unsigned char weight;

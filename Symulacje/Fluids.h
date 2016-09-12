@@ -1,13 +1,14 @@
 #pragma once
 
 void clearFluidBox() {
-	for (int i = 0; i<fluidBoxArraySize; i++) {
+	for (int i = 0; i < fluidBoxArraySize; i++) {
 		u[i] = 0.0f;
 		v[i] = 0.0f;
 		u_prev[i] = 0.0f;
 		v_prev[i] = 0.0f;
 		dens[i] = 0.05f;
 		dens_prev[i] = 0.0f;
+		fluidObstacles[i] = false;
 	}
 }
 
@@ -17,6 +18,20 @@ void add_source(float * x, float * s, float dt) {
 }
 
 void set_bnd(int b, float * x) {
+	for (int i = 1; i <= fluidBoxX; i++) {
+		for (int j = 1; j <= fluidBoxY; j++) {
+			if (fluidObstacles[IX(i, j)]) {
+
+				x[IX(i, j)] = x[IX(i - 1, j)];
+				x[IX(i, j)] -= x[IX(i, j - 1)];
+				x[IX(i, j)] += x[IX(i + 1, j)];
+				x[IX(i, j)] -= x[IX(i + 1, j + 1)];
+
+				x[IX(i, j)] *= 0.25;
+			}
+		}
+	}
+	
 	for (int i = 1; i <= fluidBoxY; i++) {
 		x[IX(0, i)] = b == 1 ? -x[IX(1, i)] : x[IX(1, i)];
 		x[IX(fluidBoxX + 1, i)] = b == 1 ? -x[IX(fluidBoxX, i)] : x[IX(fluidBoxX, i)];
@@ -25,6 +40,9 @@ void set_bnd(int b, float * x) {
 		x[IX(i, 0)] = b == 2 ? -x[IX(i, 1)] : x[IX(i, 1)];
 		x[IX(i, fluidBoxY + 1)] = b == 2 ? -x[IX(i, fluidBoxY)] : x[IX(i, fluidBoxY)];
 	}
+
+	
+
 	x[IX(0, 0)] = 0.5f*(x[IX(1, 0)] + x[IX(0, 1)]);
 	x[IX(0, fluidBoxY + 1)] = 0.5f*(x[IX(1, fluidBoxY + 1)] + x[IX(0, fluidBoxY)]);
 	x[IX(fluidBoxX + 1, 0)] = 0.5f*(x[IX(fluidBoxX, 0)] + x[IX(fluidBoxX + 1, 1)]);

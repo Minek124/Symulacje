@@ -40,7 +40,7 @@ void printCell(int x, int y) {
 	std::string liquid = (IS_LIQUID(x, y) ? (LIQUID_DIR(x, y) ? ", LIQUID_RIGHT" : ", LIQUID_LEFT") : ", NOT_LIQUID");
 	std::string solid = (IS_SOLID(x, y) ? ", SOLID" : ", NOT_SOLID");
 	std::string falling = (IS_MOVING(x, y) ? ", FALLING" : ", NOT_FALLING");
-	std::string speed = ", velocity: [" + std::to_string(cells[XY(x, y)].velocityX) + ", " + std::to_string(cells[XY(x, y)].velocityY) + "]" + ((abs(cells[XY(x, y)].velocityX) >= 1 || abs(cells[XY(x, y)].velocityY) >= 1) ? "PHYSIC" : "AUTO");
+	std::string speed = ", velocity: [" + std::to_string(cells[XY(x, y)].velX) + ", " + std::to_string(cells[XY(x, y)].velY) + "]" + ((abs(cells[XY(x, y)].velX) >= 1 || abs(cells[XY(x, y)].velY) >= 1) ? "PHYSIC" : "AUTO");
 	std::string active = (cells[XY(x, y)].activeCellIndex != -1 ? ", ACTIVE: " + std::to_string(activeCells[cells[XY(x, y)].activeCellIndex]) : ", NOT_ACTIVE");
 	std::string temperature = " temp:" + std::to_string(cells[XY(x, y)].temperature);
 	std::string proc = ( IS_UPDATED(x,y) ? " proc:" : " not_proc");
@@ -103,8 +103,8 @@ void createCell(int x, int y, unsigned int type) {
 	// cell properties
 	Property prop = properties[type];
 
-	cells[XY(x, y)].velocityY = 0;
-	cells[XY(x, y)].velocityX = 0;
+	cells[XY(x, y)].velY = 0;
+	cells[XY(x, y)].velX = 0;
 	cells[XY(x, y)].temperature = prop.initTemperature;
 	cells[XY(x, y)].type = type;
 	cells[XY(x, y)].weight = prop.weight;
@@ -130,14 +130,14 @@ void createCell(int x, int y, unsigned int type) {
 }
 
 void transformCell(int x, int y, unsigned char type) {
-	float velX = cells[XY(x, y)].velocityX;
-	float velY = cells[XY(x, y)].velocityY;
+	float velX = cells[XY(x, y)].velX;
+	float velY = cells[XY(x, y)].velY;
 	float temperature = cells[XY(x, y)].temperature;
 
 	createCell(x, y, type);
 
-	cells[XY(x, y)].velocityX = velX;
-	cells[XY(x, y)].velocityY = velY;
+	cells[XY(x, y)].velX = velX;
+	cells[XY(x, y)].velY = velY;
 	cells[XY(x, y)].temperature = temperature;
 }
 
