@@ -17,6 +17,6 @@ if(NOT OPENGL_FOUND)
     message(ERROR " OPENGL not found!")
 endif(NOT OPENGL_FOUND)
 
-add_executable(symulacje main.cpp picopng.h Config.h Globals.h Tools.h Automation.h Fluids.h Physics.h)
+add_executable(symulacje main.cpp Config.h Globals.h Tools.h UpdateFunctions.h Fluids.h Physics.h Properties.h)
 
 target_link_libraries(symulacje ${OPENGL_LIBRARIES} ${GLUT_LIBRARY})
