@@ -126,12 +126,12 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Automation.h" />
+    <ClInclude Include="Properties.h" />
+    <ClInclude Include="UpdateFunctions.h" />
     <ClInclude Include="Config.h" />
     <ClInclude Include="Fluids.h" />
     <ClInclude Include="Globals.h" />
     <ClInclude Include="Physics.h" />
-    <ClInclude Include="picopng.h" />
     <ClInclude Include="Structures.h" />
     <ClInclude Include="Tools.h" />
   </ItemGroup>

@@ -60,8 +60,8 @@ void updatePhysics(int srcX, int srcY) {
 				cells[XY(srcX, srcY)].velY -= projection * normalY;
 
 				// apply friction
-				cells[XY(srcX, srcY)].velX *= (cells[XY(srcX, srcY)].springiness / 100.0f);
-				cells[XY(srcX, srcY)].velY *= (cells[XY(srcX, srcY)].springiness / 100.0f);
+				cells[XY(srcX, srcY)].velX *= (properties[cells[XY(srcX, srcY)].type].springiness / 100.0f);
+				cells[XY(srcX, srcY)].velY *= (properties[cells[XY(srcX, srcY)].type].springiness / 100.0f);
 
 				if (srcX != dstX || srcY != dstY) {
 					moveCell(srcX, srcY, dstX, dstY);

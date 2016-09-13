@@ -7,9 +7,8 @@ struct Cell {
 	float velY;
 	float temperature;
 	unsigned char type;
-	unsigned char weight;
-	unsigned char springiness;
 	unsigned char flags;
+	unsigned char other;
 };
 
 struct Property {
@@ -27,15 +26,3 @@ struct Property {
 	bool solid;
 	unsigned int RGB;
 };
-
-
-void updateFluid(int x, int y);
-void updateSand(int x, int y);
-void updateFlame(int x, int y);
-void updateAir(int x, int y);
-void burn(int x, int y);
-void updateCell(int pos);
-
-inline float Random() {
-	return ((float)rand() / (RAND_MAX));
-}

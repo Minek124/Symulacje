@@ -24,6 +24,9 @@ int *activeCells;
 // cell array
 Cell *cells;
 
+// cell properties
+Property *properties;
+
 //fluids
 int ox;
 int oy;
@@ -47,3 +50,4 @@ bool logging = false;
 bool showDensity = false;
 long timer;
 int fps;
+

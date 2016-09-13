@@ -6,28 +6,23 @@
 #include <cmath>
 #include <climits>
 
-#include "picopng.h"
-
 #include "Config.h"
 #include "Globals.h"
 #include "Tools.h"
-#include "Automation.h"
+#include "UpdateFunctions.h"
+#include "Properties.h"
 #include "Fluids.h"
 #include "Physics.h"
 
 using namespace std;
 
 inline void preUpdate(int x, int y) {
-	/*float temp = cells[XY(x, y)].temperature / 100;
-	cells[XY(x, y)].temperature -= 20 * temp;
-
-	cells[XY(x, y - 1)].temperature += 5 * temp;
-	cells[XY(x - 1, y)].temperature += 5 * temp;
-	cells[XY(x + 1, y)].temperature += 5 * temp;
-	cells[XY(x, y + 1)].temperature += 5 * temp;*/
+	
+#ifdef ENABLE_HEAT
+	cells[XY(x, y)].temperature = (cells[XY(x, y - 1)].temperature + cells[XY(x - 1, y)].temperature + cells[XY(x + 1, y)].temperature + cells[XY(x, y + 1)].temperature) * 0.25f;
+#endif
 
 	UNSET_UPDATED(x, y);
-
 }
 
 void updateCell(int pos) {
@@ -53,6 +48,7 @@ void updateCell(int pos) {
 	// air movements
 	int i = x / 10 + 1;
 	int j = y / 10 + 1;
+	
 	cells[pos].velX += (u[IX(i, j)]) * 100 / (prop.weight + 1);
 	cells[pos].velY += (v[IX(i, j)]) * 100 / (prop.weight + 1);
 
@@ -83,14 +79,13 @@ void mainLoop() {
 	for (int i = 1; i < activeCellCount; i += 2)
 		updateCell(activeCells[i]);
 
-	// fluids
+#ifdef ENABLE_FLUIDS
 	vel_step(u, v, u_prev, v_prev, 0.0f, 0.4f);
 	dens_step(dens, dens_prev, u, v, 0.0f, 0.4f);
-
-
 	memset(u_prev, 0, fluidBoxArraySize*sizeof(float));
 	memset(v_prev, 0, fluidBoxArraySize*sizeof(float));
 	memset(dens_prev, 0, fluidBoxArraySize*sizeof(float));
+#endif
 
 	if (!showDensity)
 		updatePixelMap();
@@ -102,15 +97,10 @@ void mainLoop() {
 
 void initSimulation(char *path) {
 	//load and decode image
-	std::vector<unsigned char> buffer, image;
-	loadFile(buffer, path);
-	unsigned long w, h;
-	int error = decodePNG(image, w, h, buffer.empty() ? 0 : &buffer[0], (unsigned long)buffer.size());
-	if (error != 0) std::cout << "error: " << error << std::endl;
-	if (image.size() > 4) std::cout << "width: " << w << " height: " << h << std::endl;
-
-	mapSizeX = w;
-	mapSizeY = h;
+	loadProperties();
+	
+	mapSizeX = 600;
+	mapSizeY = 600;
 
 	pixels = new unsigned int[mapSizeY*mapSizeX]; // delete
 	activeCells = new int[mapSizeY*mapSizeX]; //delete
@@ -138,19 +128,13 @@ void initSimulation(char *path) {
 		randomBool[i] = (Random() < 0.5 ? true : false);
 	}
 
-	for (int y = 0; y < mapSizeY; y++) {
-		for (int x = 0; x < mapSizeX; x++) {
-			int xy = (y * mapSizeX * 4) + (x * 4);
-			unsigned char r = image[xy];
-			unsigned char g = image[xy + 1];
-			unsigned char b = image[xy + 2];
-			unsigned int type = colorToType(r, g, b);
-			createCell(x, y, type);
-			if (type == WALL) {
-				int i = x / 10 + 1;
-				int j = y / 10 + 1;
-				if(i > 1 && j > 1 && i < fluidBoxX && j < fluidBoxY)
-				fluidObstacles[IX(i, j)] = true;
+	for (int i = 0; i < mapSizeX; i++) {
+		for (int j = 0; j < mapSizeY; j++) {
+			if (i < 4 || j < 4 || i > mapSizeX - 5 || j > mapSizeY - 5) {
+				createCell(i, j, WALL);
+			}
+			else {
+				createCell(i, j, EMPTY);
 			}
 		}
 	}
@@ -215,13 +199,19 @@ void keyboard(unsigned char key, int x, int y) {
 		spawnType = RUBBER;
 		break;
 	case 55:     // 7
-		spawnType = STEAM;
+		spawnType = POWDER;
 		break;
 	case 56:     // 8
-		spawnType = ICE;
+		spawnType = STEAM;
 		break;
 	case 57:     // 9
-		spawnType = WALL;
+		spawnType = ICE;
+		break;
+	case 97:     // a
+		if (x >= 0 && x < mapSizeX && y >= 0 && y < mapSizeY) {
+			createCell(x, y, spawnType);
+			cells[XY(x, y)].velX = -10;
+		}
 		break;
 	case 98:     // b
 		for (int i = x - spawnRadius; i <= x + spawnRadius; ++i) {
@@ -239,16 +229,18 @@ void keyboard(unsigned char key, int x, int y) {
 	case 99:     // c
 		printCell(x, y);
 		break;
+	case 100:     // d
+		if (x >= 0 && x < mapSizeX && y >= 0 && y < mapSizeY) {
+			createCell(x, y, spawnType);
+			cells[XY(x, y)].velX = 10;
+		}
+		break;
 	case 101: //  e
 		for (int i = x - spawnRadius; i <= x + spawnRadius; ++i) {
 			for (int j = y - spawnRadius; j <= y + spawnRadius; ++j) {
 				if (i >= 0 && i < mapSizeX && j >= 0 && j < mapSizeY) {
 					if ((((j - y)*(j - y)) + ((i - x)*(i - x))) <= (spawnRadius*spawnRadius) && (TYPE(i, j) == EMPTY || hardSpawn)) {
-						if (Random() < 0.5) {
-							createCell(i, j, spawnType);
-							cells[XY(i, j)].velX = (Random() < 0.5 ? (Random() * 5.0f + 1.0f) : (-Random() * 5.0f - 1.0f));
-							cells[XY(i, j)].velY = (Random() < 0.5 ? (Random() * 5.0f + 1.0f) : (-Random() * 5.0f - 1.0f));
-						}
+						createCell(i, j, spawnType);
 					}
 				}
 			}
@@ -308,14 +300,35 @@ void keyboard(unsigned char key, int x, int y) {
 		paused = !paused;
 		break;
 	case 113:     // q
-		paused = !paused;
+		for (int i = 15; i < 35; i++) {
+			for (int j = 0; j < 50; j++) {
+				createCell(200 + i, 50 +  j, SAND);
+			}
+		}
+		
+		for (int i = 0; i < 50; i++) {
+			createCell(200 + i, 100, WALL);
+		}
 		break;
 	case 114:     // r
 
 		break;
+	case 115:     // s
+		if (x >= 0 && x < mapSizeX && y >= 0 && y < mapSizeY) {
+			createCell(x, y, spawnType);
+			cells[XY(x, y)].velY = 10;
+		}
+		break;
 	case 118:     // v
 		if (x >= 0 && x < mapSizeX && y >= 0 && y < mapSizeY)
 			createCell(x, y, spawnType);
+		break;
+	
+	case 119:     // w
+		if (x >= 0 && x < mapSizeX && y >= 0 && y < mapSizeY) {
+			createCell(x, y, spawnType);
+			cells[XY(x, y)].velY = -10;
+		}
 		break;
 	}
 }
@@ -371,7 +384,7 @@ void mouse(int button, int state, int x, int y) {
 
 int main(int argc, char** argv) {
 
-	initSimulation(MAP);
+	initSimulation("mapa.png");
 
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE);

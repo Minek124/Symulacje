@@ -1,5 +1,7 @@
 #pragma once
 
+void updateCell(int);
+
 void burn(int x, int y) {
 	if (TYPE(x, y - 1) == EMPTY) {
 		createCell(x, y, FLAME);
@@ -34,46 +36,45 @@ void updateSand(int x, int y) {
 }
 
 void updateFluid(int x, int y) {
-	char weight = cells[XY(x, y)].weight;
+	char weight = properties[cells[XY(x, y)].type].weight;
 	int dstY = y + 1;
-	if (IS_LIQUID(x, dstY) && weight > cells[XY(x, dstY)].weight) {
+	if (IS_LIQUID(x, dstY) && weight > properties[cells[XY(x, dstY)].type].weight) {
 		moveCell(x, y, x, dstY);
 		return;
 	}
-	if (IS_LIQUID(x + 1, dstY) && randomBool[randomBoolCount++] && weight > cells[XY(x + 1, dstY)].weight) {
+	if (IS_LIQUID(x + 1, dstY) && randomBool[randomBoolCount++] && weight > properties[cells[XY(x + 1, dstY)].type].weight) {
 		RIGHT_DIR(x, y);
 		cells[XY(x, y)].velX += WA;
 		moveCell(x, y, x + 1, dstY);
 		return;
 	}
-	if (IS_LIQUID(x - 1, dstY) && weight > cells[XY(x - 1, dstY)].weight) {
+	if (IS_LIQUID(x - 1, dstY) && weight > properties[cells[XY(x - 1, dstY)].type].weight) {
 		LEFT_DIR(x, y);
 		cells[XY(x, y)].velX -= WA;
 		moveCell(x, y, x - 1, dstY);
 		return;
 	}
-	if (IS_LIQUID(x + 1, dstY) && weight > cells[XY(x + 1, dstY)].weight) {
+	if (IS_LIQUID(x + 1, dstY) && weight > properties[cells[XY(x + 1, dstY)].type].weight) {
 		RIGHT_DIR(x, y);
 		cells[XY(x, y)].velX += WA;
 		moveCell(x, y, x + 1, dstY);
 		return;
 	}
 
-	// old water hack
-	/*
+#ifdef ENABLE_WATER_HACK
 	#define WR 10
 	if (LIQUID_DIR(x, y)) {
 		int i;
 		char type = cells[XY(x, y)].type;
 		for (i = 1; IS_LIQUID(x + i, y) && i < WR; ++i) {
 			if (cells[XY(x + i, y)].type != type) {
-				cells[XY(x, y)].velocityX += WA * i;
+				cells[XY(x, y)].velX += WA * i;
 				moveCell(x, y, x + i, y);
 				return;
 			}
 		}
 		if (i < WR && IS_MOVING(x + i, y))
-			cells[XY(x + i, y)].velocityX += WA * i;
+			cells[XY(x + i, y)].velX += WA * i;
 		LEFT_DIR(x, y);
 	}
 	else {
@@ -81,18 +82,19 @@ void updateFluid(int x, int y) {
 		char type = cells[XY(x, y)].type;
 		for (i = 1; IS_LIQUID(x - i, y) && i < WR; ++i) {
 			if (cells[XY(x - i, y)].type != type) {
-				cells[XY(x, y)].velocityX -= WA * i;
+				cells[XY(x, y)].velX -= WA * i;
 				moveCell(x, y, x - i, y);
 				return;
 			}
 		}
 		if (i < WR && IS_MOVING(x - i, y))
-			cells[XY(x - i, y)].velocityX -= WA * i;
+			cells[XY(x - i, y)].velX -= WA * i;
 		RIGHT_DIR(x, y);
-	}*/
-	
+	}
+
+#else
 	if (LIQUID_DIR(x, y)) {
-		if (IS_LIQUID(x + 1, y) && weight > cells[XY(x + 1, y)].weight) {
+		if (IS_LIQUID(x + 1, y) && weight > properties[cells[XY(x + 1, y)].type].weight) {
 			cells[XY(x, y)].velX += WA;
 			moveCell(x, y, x + 1, y);
 			return;
@@ -108,7 +110,7 @@ void updateFluid(int x, int y) {
 		LEFT_DIR(x, y);
 	}
 	else {
-		if (IS_LIQUID(x - 1, y) && weight > cells[XY(x - 1, y)].weight) {
+		if (IS_LIQUID(x - 1, y) && weight > properties[cells[XY(x - 1, y)].type].weight) {
 			cells[XY(x, y)].velX -= WA;
 			moveCell(x, y, x - 1, y);
 			return;
@@ -123,37 +125,37 @@ void updateFluid(int x, int y) {
 		}
 		RIGHT_DIR(x, y);
 	}
+#endif
 
 	UNSET_MOVING(x, y);
 	cells[XY(x, y)].velY = 0;
 	cells[XY(x, y)].velX = 0;
 }
 
-#define FFF 50
 void updateFlame(int x, int y) {
+	if (cells[XY(x, y)].other >= 20) {
+		destroyCell(x, y);
+		return;
+	}
+	cells[XY(x, y)].other += 1;
 	if (TYPE(x, y - 1) == EMPTY) {
-		cells[XY(x, y)].temperature -= FFF;
 		cloneCell(x, y, x, y - 1);
 	}
 	else if (TYPE(x - 1, y - 1) == EMPTY) {
-		cells[XY(x, y)].temperature -= FFF;
 		cloneCell(x, y, x - 1, y - 1);
 	}
 	else if (TYPE(x + 1, y - 1) == EMPTY) {
-		cells[XY(x, y)].temperature -= FFF;
 		cloneCell(x, y, x + 1, y - 1);
 	}
 	else if (TYPE(x - 1, y) == EMPTY) {
-		cells[XY(x, y)].temperature -= FFF;
 		cloneCell(x, y, x - 1, y);
 	}
 	else if (TYPE(x + 1, y) == EMPTY) {
-		cells[XY(x, y)].temperature -= FFF;
 		cloneCell(x, y, x + 1, y);
 	}
 	int i = x / 10 + 1;
 	int j = y / 10 + 1;
-	v_prev[IX(i, j)] = -0.005f;
+	v_prev[IX(i, j)] = -0.001f;
 }
 
 void updateAir(int x, int y) {
@@ -183,6 +185,5 @@ void updateAir(int x, int y) {
 			moveCell(x, y, x - 1, y);
 		}
 		break;
-
 	}
 }

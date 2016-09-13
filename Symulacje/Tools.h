@@ -1,13 +1,17 @@
 #pragma once
 
+inline float Random() {
+	return ((float)rand() / (RAND_MAX));
+}
+
 void updatePixelMap() {
 	for (int i = 0; i < mapSizeY; i++) {
 		for (int j = 0; j < mapSizeX; j++) {
-			//if (cells[XY(j, i)].type != FLAME)
+			if (cells[XY(j, i)].type != FLAME)
 				pixels[TEX_XY(j, i)] = properties[cells[XY(j, i)].type].RGB | ALPHA;
-			/*else {
-				pixels[TEX_XY(j, i)] = FLAME_RGB(2 * (5 - ((int)((cells[XY(j, i)].temperature - FLAME_LOW_TEMP)) / 100))) | ALPHA;
-			}*/
+			else {
+				pixels[TEX_XY(j, i)] = FLAME_RGB(5 + cells[XY(j, i)].other) | ALPHA;
+			}
 		}
 	}
 }
@@ -107,9 +111,8 @@ void createCell(int x, int y, unsigned int type) {
 	cells[XY(x, y)].velX = 0;
 	cells[XY(x, y)].temperature = prop.initTemperature;
 	cells[XY(x, y)].type = type;
-	cells[XY(x, y)].weight = prop.weight;
-	cells[XY(x, y)].springiness = prop.springiness;
 	cells[XY(x, y)].flags = 0;
+	cells[XY(x, y)].other = 0;
 
 	if (properties[type].active) {
 		activeCells[activeCellCount] = XY(x, y);
