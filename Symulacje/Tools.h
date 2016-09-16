@@ -8,7 +8,7 @@ void updatePixelMap() {
 	for (int i = 0; i < mapSizeY; i++) {
 		for (int j = 0; j < mapSizeX; j++) {
 			if (cells[XY(j, i)].type != FLAME)
-				pixels[TEX_XY(j, i)] = properties[cells[XY(j, i)].type].RGB | ALPHA;
+				pixels[TEX_XY(j, i)] = properties[cells[XY(j, i)].type].color | ALPHA;
 			else {
 				pixels[TEX_XY(j, i)] = FLAME_RGB(5 + cells[XY(j, i)].other) | ALPHA;
 			}
@@ -20,7 +20,7 @@ void updatePixelMap() {
 void updatePixelMap2() {
 	for (int i = 0; i < mapSizeX; i++) {
 		for (int j = 0; j < mapSizeY; j++) {
-			pixels[TEX_XY(i, j)] = properties[cells[XY(i, j)].type].RGB | ALPHA;
+			pixels[TEX_XY(i, j)] = properties[cells[XY(i, j)].type].color | ALPHA;
 		}
 	}
 	for (int i = 1; i <= fluidBoxX; i++) {

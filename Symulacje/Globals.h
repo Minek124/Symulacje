@@ -46,8 +46,10 @@ unsigned int spawnType = 2;
 int spawnRadius = 15;
 bool hardSpawn = false;
 bool paused = false;
-bool logging = false;
 bool showDensity = false;
+bool debug = false;
+bool nextStep = false;
 long timer;
 int fps;
+
 

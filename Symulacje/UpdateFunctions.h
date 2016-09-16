@@ -156,6 +156,7 @@ void updateFlame(int x, int y) {
 	int i = x / 10 + 1;
 	int j = y / 10 + 1;
 	v_prev[IX(i, j)] = -0.001f;
+	dens_prev[IX(i, j)] += 0.01f;
 }
 
 void updateAir(int x, int y) {
@@ -186,4 +187,24 @@ void updateAir(int x, int y) {
 		}
 		break;
 	}
+}
+
+void attractAll(int x, int y) {
+	
+
+	int r = 50;
+	float force = 200.0f;
+
+	for (int i = x - r; i <= x + r; i++) {
+		for (int j = y - r; j <= y + r; j++) {
+			if (i != x && j != y) {
+				float radius =(float) (sqrt(((x - i) * (x - i)) + ((y - j) * (y - j))));
+				cells[XY(i, j)].velX += (force * (x - i) / abs((x - i))) / radius;
+				cells[XY(i, j)].velY += (force * (y - j) / abs((y - j))) / radius;
+			}
+		}
+	}
+
+	cells[XY(x, y)].velX = 0;
+	cells[XY(x, y)].velY = 0;
 }

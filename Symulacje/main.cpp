@@ -4,7 +4,6 @@
 #include <string.h>
 #include <time.h>
 #include <cmath>
-#include <climits>
 
 #include "Config.h"
 #include "Globals.h"
@@ -17,16 +16,16 @@
 using namespace std;
 
 inline void preUpdate(int x, int y) {
-	
+
 #ifdef ENABLE_HEAT
-	cells[XY(x, y)].temperature = (cells[XY(x, y - 1)].temperature + cells[XY(x - 1, y)].temperature + cells[XY(x + 1, y)].temperature + cells[XY(x, y + 1)].temperature) * 0.25f;
+	cells[XY(x, y)].temperature = (cells[XY(x, y - 1)].temperature + cells[XY(x, y + 1)].temperature + cells[XY(x - 1, y)].temperature + cells[XY(x + 1, y)].temperature) * 0.25f;
 #endif
 
 	UNSET_UPDATED(x, y);
 }
 
 void updateCell(int pos) {
-	if ( (cells[pos].flags & (1 << (6))) ) // already updated
+	if ((cells[pos].flags & (1 << (6)))) // already updated
 		return;
 	cells[pos].flags |= (1 << 6); // set cell updated
 
@@ -44,16 +43,18 @@ void updateCell(int pos) {
 		transformCell(x, y, prop.lowTemperatureTransform);
 		prop = properties[cells[pos].type];
 	}
-	
-	// air movements
-	int i = x / 10 + 1;
-	int j = y / 10 + 1;
-	
-	cells[pos].velX += (u[IX(i, j)]) * 100 / (prop.weight + 1);
-	cells[pos].velY += (v[IX(i, j)]) * 100 / (prop.weight + 1);
 
-	//gravity
-	cells[pos].velY += G * prop.weight;
+	if (!prop.noGravity) {
+		// air movements
+		int i = x / 10 + 1;
+		int j = y / 10 + 1;
+
+		cells[pos].velX += (u[IX(i, j)]) * 100 / (prop.weight + 1);
+		cells[pos].velY += (v[IX(i, j)]) * 100 / (prop.weight + 1);
+
+		//gravity
+		cells[pos].velY += G;
+	}
 
 	prop.specialBehaviorFunction(x, y);
 
@@ -66,13 +67,13 @@ void updateCell(int pos) {
 }
 
 void mainLoop() {
-	if (paused)
+	if (paused || (debug && !nextStep))
 		return;
-
+	
 	for (int i = 1; i < mapSizeX - 1; ++i)
 		for (int j = 1; j < mapSizeY - 1; ++j)
 			preUpdate(i, j);
-
+	
 	for (int i = 0; i < activeCellCount; i += 2)
 		updateCell(activeCells[i]);
 
@@ -95,18 +96,35 @@ void mainLoop() {
 	glutPostRedisplay();
 }
 
-void initSimulation(char *path) {
+void display() {
+	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glDrawPixels(mapSizeX, mapSizeY, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+	++fps;
+	double stop = (clock() - timer)*1.0 / CLOCKS_PER_SEC;
+
+	nextStep = false;
+
+	if (stop > 1.0) {
+		cout << "fps:" << fps << endl;
+		timer = clock();
+		fps = 0;
+	}
+
+	glutSwapBuffers();
+}
+
+void initSimulation() {
 	//load and decode image
 	loadProperties();
-	
-	mapSizeX = 600;
-	mapSizeY = 600;
+
+	mapSizeX = 500;
+	mapSizeY = 500;
 
 	pixels = new unsigned int[mapSizeY*mapSizeX]; // delete
 	activeCells = new int[mapSizeY*mapSizeX]; //delete
 	cells = new Cell[mapSizeY*mapSizeX]; //delete
 
-	//fluids
+										 //fluids
 	fluidBoxX = mapSizeX / FLUID_BOX_SCALE;
 	fluidBoxY = mapSizeY / FLUID_BOX_SCALE;
 	fluidBoxArraySize = (fluidBoxY + 2)*(fluidBoxX + 2);
@@ -140,22 +158,6 @@ void initSimulation(char *path) {
 	}
 
 	updatePixelMap();
-}
-
-void display() {
-	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glDrawPixels(mapSizeX, mapSizeY, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
-	++fps;
-	double stop = (clock() - timer)*1.0 / CLOCKS_PER_SEC;
-
-	if (stop > 1.0) {
-		if (logging)
-			cout << "fps:" << fps << endl;
-		timer = clock();
-		fps = 0;
-	}
-
-	glutSwapBuffers();
 }
 
 /* Callback handler for normal-key event */
@@ -202,7 +204,7 @@ void keyboard(unsigned char key, int x, int y) {
 		spawnType = POWDER;
 		break;
 	case 56:     // 8
-		spawnType = STEAM;
+		spawnType = FIELD1;
 		break;
 	case 57:     // 9
 		spawnType = ICE;
@@ -259,7 +261,6 @@ void keyboard(unsigned char key, int x, int y) {
 	break;
 	case 103: // g
 	{
-		float force = 5.0f;
 		int i = (int)(x / FLUID_BOX_SCALE);
 		int j = (int)(y / FLUID_BOX_SCALE);
 		dens_prev[IX(i, j)] = 100.0f;
@@ -291,7 +292,7 @@ void keyboard(unsigned char key, int x, int y) {
 	}
 	break;
 	case 108:     // l
-		logging = !logging;
+		debug = !debug;
 		break;
 	case 110:     // n
 		showDensity = !showDensity;
@@ -311,7 +312,7 @@ void keyboard(unsigned char key, int x, int y) {
 		}
 		break;
 	case 114:     // r
-
+		nextStep = true;
 		break;
 	case 115:     // s
 		if (x >= 0 && x < mapSizeX && y >= 0 && y < mapSizeY) {
@@ -384,7 +385,7 @@ void mouse(int button, int state, int x, int y) {
 
 int main(int argc, char** argv) {
 
-	initSimulation("mapa.png");
+	initSimulation();
 
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE);
