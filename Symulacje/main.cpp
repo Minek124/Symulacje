@@ -88,9 +88,7 @@ void mainLoop() {
 	memset(dens_prev, 0, fluidBoxArraySize*sizeof(float));
 #endif
 
-	if (!showDensity)
-		updatePixelMap();
-	else
+	if (showDensity)
 		updatePixelMap2();
 
 	glutPostRedisplay();
@@ -105,7 +103,7 @@ void display() {
 	nextStep = false;
 
 	if (stop > 1.0) {
-		cout << "fps:" << fps << endl;
+		cout << "fps:" << fps << " active cells:" << activeCellCount << endl;
 		timer = clock();
 		fps = 0;
 	}
@@ -156,8 +154,6 @@ void initSimulation() {
 			}
 		}
 	}
-
-	updatePixelMap();
 }
 
 /* Callback handler for normal-key event */
@@ -195,10 +191,10 @@ void keyboard(unsigned char key, int x, int y) {
 		spawnType = OLIVE;
 		break;
 	case 53:     // 5
-		spawnType = FLAME;
+		spawnType = RUBBER;
 		break;
 	case 54:     // 6
-		spawnType = RUBBER;
+		spawnType = FLAME;
 		break;
 	case 55:     // 7
 		spawnType = POWDER;

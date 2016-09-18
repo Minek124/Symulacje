@@ -7,11 +7,7 @@ inline float Random() {
 void updatePixelMap() {
 	for (int i = 0; i < mapSizeY; i++) {
 		for (int j = 0; j < mapSizeX; j++) {
-			if (cells[XY(j, i)].type != FLAME)
-				pixels[TEX_XY(j, i)] = properties[cells[XY(j, i)].type].color | ALPHA;
-			else {
-				pixels[TEX_XY(j, i)] = FLAME_RGB(5 + cells[XY(j, i)].other) | ALPHA;
-			}
+			pixels[TEX_XY(j, i)] = properties[cells[XY(j, i)].type].color | ALPHA;
 		}
 	}
 }
@@ -78,16 +74,25 @@ void moveCell(int srcX, int srcY, int dstX, int dstY) {
 	cells[XY(srcX, srcY)] = cells[XY(dstX, dstY)];
 	cells[XY(dstX, dstY)] = tmp;
 
+	unsigned int tmpPixel = pixels[TEX_XY(srcX, srcY)];
+	pixels[TEX_XY(srcX, srcY)] = pixels[TEX_XY(dstX, dstY)];
+	pixels[TEX_XY(dstX, dstY)] = tmpPixel;
+
 	if (cells[XY(srcX, srcY)].activeCellIndex != -1) {
 		activeCells[cells[XY(srcX, srcY)].activeCellIndex] = XY(srcX, srcY);
 	}
 	if (cells[XY(dstX, dstY)].activeCellIndex != -1) {
 		activeCells[cells[XY(dstX, dstY)].activeCellIndex] = XY(dstX, dstY);
 	}
+
+
 }
 
 void cloneCell(int srcX, int srcY, int dstX, int dstY) {
 	cells[XY(dstX, dstY)] = cells[XY(srcX, srcY)];
+
+	pixels[TEX_XY(dstX, dstY)] = pixels[TEX_XY(srcX, srcY)];
+
 	if (cells[XY(dstX, dstY)].activeCellIndex != -1) {
 		activeCells[activeCellCount] = XY(dstX, dstY);
 		cells[XY(dstX, dstY)].activeCellIndex = activeCellCount;
@@ -113,6 +118,8 @@ void createCell(int x, int y, unsigned int type) {
 	cells[XY(x, y)].type = type;
 	cells[XY(x, y)].flags = 0;
 	cells[XY(x, y)].other = 0;
+
+	pixels[TEX_XY(x, y)] = prop.color | ALPHA;
 
 	if (properties[type].active) {
 		activeCells[activeCellCount] = XY(x, y);

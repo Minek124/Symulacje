@@ -138,7 +138,9 @@ void updateFlame(int x, int y) {
 		return;
 	}
 	cells[XY(x, y)].other += 1;
+	pixels[TEX_XY(x, y)] = FLAME_RGB(cells[XY(x, y)].other);
 	if (TYPE(x, y - 1) == EMPTY) {
+		
 		cloneCell(x, y, x, y - 1);
 	}
 	else if (TYPE(x - 1, y - 1) == EMPTY) {
