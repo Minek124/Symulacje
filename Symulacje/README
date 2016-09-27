@@ -1,0 +1,15 @@
+﻿Kompilacja:
+
+Windows – Microsoft Visual Studio:
+	- Instalacja środowiska programistycznego – Microsoft Visual Studio C++
+	- Uruchomienie projektu Symulacje.sln 
+
+Linux - Debian/Ubuntu:
+	- Instalacja najnowszej wersji g++ i CMake
+		sudo apt-get install g++ cmake
+	- Instalacja potrzebnych bibliotek:
+		sudo apt-get install freeglut3 freeglut3-dev libxmu-dev libxi-dev
+	- Kompilacja:
+		cmake . && make
+	- Uruchomienie:
+		./symulacja

@@ -57,6 +57,7 @@
 #define IS_MOVING(x,y) (cells[XY(x,y)].flags & (1<<(3)))
 #define IS_SOLID(x,y) (cells[XY(x,y)].flags & (1<<(4)))
 #define IS_UPDATED(x,y) (cells[XY(x,y)].flags & (1<<(6)))
+
 #define IS_EMPTY(x,y) (cells[XY(x,y)].type == EMPTY)
 #define IS_ACTIVE(x,y) (cells[XY(x, y)].activeCellIndex != -1)
 #define TYPE(x,y) cells[XY(x,y)].type

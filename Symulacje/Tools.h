@@ -156,13 +156,13 @@ inline void destroyCell(int x, int y) {
 }
 
 // Bresenham's line algorithm for colision detection
+// Code taken from http://www.gamedev.net/page/resources/_/technical/game-programming/line-drawing-algorithm-explained-r1275
 bool checkWay(int& startX, int& startY, int& endX, int& endY) {
-	int deltax = abs((int)(endX - startX));
-	int deltay = abs((int)(endY - startY));
+	int deltax = abs(endX - startX);
+	int deltay = abs(endY - startY);
 	int x = startX;
 	int y = startY;
 	int xinc1, xinc2, yinc1, yinc2;
-	// Determine whether x and y is increasing or decreasing 
 	if (endX >= startX) { // The x-values are increasing     
 		xinc1 = 1;
 		xinc2 = 1;
