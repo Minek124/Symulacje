@@ -25,7 +25,7 @@ void loadProperties() {
 	properties[type].updateFunction = updateSand;
 	properties[type].highTemeperature = 600;
 	properties[type].highTemperatureTransform = GLASS;
-	properties[type].weight = 20;
+	properties[type].weight = 17;
 	properties[type].springiness = 12;
 	properties[type].active = true;
 	properties[type].liquid = false;
@@ -39,7 +39,7 @@ void loadProperties() {
 	properties[type].initTemperature = 20;
 	properties[type].highTemperatureTransform = STEAM;
 	properties[type].lowTemperatureTransform = ICE;
-	properties[type].weight = 10;
+	properties[type].weight = 15;
 	properties[type].springiness = 1;
 	properties[type].active = true;
 	properties[type].liquid = true;
@@ -50,7 +50,7 @@ void loadProperties() {
 	properties[type].updateFunction = updateFluid;
 	properties[type].highTemeperature = 300;
 	properties[type].highTemperatureTransform = FIRE_OIL;
-	properties[type].weight = 9;
+	properties[type].weight = 13;
 	properties[type].springiness = 3;
 	properties[type].active = true;
 	properties[type].liquid = true;
@@ -153,7 +153,7 @@ void loadProperties() {
 
 	type = POWDER;
 	properties[type].updateFunction = updateSand;
-	properties[type].weight = 1;
+	properties[type].weight = 4;
 	properties[type].springiness = 1;
 	properties[type].active = true;
 	properties[type].liquid = false;

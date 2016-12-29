@@ -2,7 +2,7 @@
 
 #define ENABLE_FLUIDS
 #define ENABLE_HEAT
-//#define ENABLE_WATER_HACK
+#define ENABLE_WATER_HACK
 
 #define EMPTY 0
 #define WALL 1
@@ -39,7 +39,7 @@
 #define ALPHA 4278190080
 
 //CONSTANTS
-#define G 0.7f
+#define G 0.03f
 #define SA 0.1f // 0.5 G
 #define WA 0.4f
 

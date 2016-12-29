@@ -157,7 +157,7 @@ void updateFlame(int x, int y) {
 	}
 	int i = x / 10 + 1;
 	int j = y / 10 + 1;
-	v_prev[IX(i, j)] = -0.001f;
+	v_prev[IX(i, j)] = -0.0001f;
 	dens_prev[IX(i, j)] += 0.01f;
 }
 

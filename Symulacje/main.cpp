@@ -44,16 +44,17 @@ void updateCell(int pos) {
 		prop = properties[cells[pos].type];
 	}
 
-	if (!prop.noGravity) {
+	
 		// air movements
 		int i = x / 10 + 1;
 		int j = y / 10 + 1;
 
 		cells[pos].velX += (u[IX(i, j)]) * 100 / (prop.weight + 1);
 		cells[pos].velY += (v[IX(i, j)]) * 100 / (prop.weight + 1);
-
+	
+	if (!prop.noGravity) {
 		//gravity
-		cells[pos].velY += G;
+		cells[pos].velY += G * prop.weight;
 	}
 
 	prop.specialBehaviorFunction(x, y);

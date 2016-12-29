@@ -26,8 +26,10 @@ void updatePhysics(int srcX, int srcY) {
 			cells[XY(srcX, srcY)].velY = av;
 			cells[XY(obstacleX, obstacleY)].velY = av;
 			
-			if (srcX != dstX || srcY != dstY) 
+			if (srcX != dstX || srcY != dstY) {
 				moveCell(srcX, srcY, dstX, dstY);
+			}
+
 		}
 		else {
 			// Water colision
